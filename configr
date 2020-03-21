@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+
+# Configr
+# Version: 1.0.0
+# Author : Michael Auderer
+# Github Profile : https://github.com/auderer
+# Project Repository : https://github.com/auderer/configr
+
+usage() {
+  echo 'Commands:'
+  echo
+  echo '  help'
+  echo '    Show command usage.'
+  echo
+  echo '  add <name> </path/to/file>'
+  echo '    Register a new config file.'
+  echo
+  echo '  get <name>'
+  echo '    Prints the path of a registered config.'
+  echo
+  echo '  mv <name> </path/to/file>'
+  echo '    Change the file path of a registered config.'
+  echo
+  echo '  rm <name>'
+  echo '    Remove a config file from the registry.'
+  echo
+  echo '  open <name>'
+  echo '    Opens a config file in your default editor.'
+  echo
+  echo '  list'
+  echo '    Lists all registered config names and their paths.'
+}
+
+CONFIGRCONFIG=${CONFIGRCONFIG:-"$HOME/.config/configr/configmap"}
+
+# create config file if it doesn't exist
+if [ ! -e "$CONFIGRCONFIG" ]
+then
+  mkdir -p $(dirname $CONFIGRCONFIG)
+  touch $CONFIGRCONFIG
+fi
+
+# create associative array for config map
+declare -A configmap
+
+# read each line from the config
+readarray -t lines < $CONFIGRCONFIG
+
+for i in "${lines[@]}"
+do
+  :
+  # parse each line splitting by colon+space
+  IFS=": "; read -a parsed_line <<< "$i"
+  configmap["${parsed_line[0]}"]="${parsed_line[1]}"
+done
+
+save() {
+  > $CONFIGRCONFIG
+
+  for key in "${!configmap[@]}"
+  do
+    :
+    echo "$key: ${configmap[$key]}" >> $CONFIGRCONFIG
+  done
+}
+
+add() {
+  NAME=$1
+  CONFIGPATH=$2
+
+  if [ -z "$NAME" ] || [ -z "$CONFIGPATH" ]
+  then
+    echo "Missing parameter."
+    echo "Usage: add <name> </path/to/file>"
+    return
+  fi
+
+  if [ -v "configmap[$NAME]" ]
+  then
+    echo "A config named $NAME is already registered at ${configmap[$NAME]}."
+    echo "To change this config's location, use the 'mv' command."
+    return
+  fi
+
+  echo "$NAME: $CONFIGPATH" >> $CONFIGRCONFIG
+
+  echo "$NAME is now registered with configr."
+}
+
+get() {
+  NAME=$1
+
+  if [ -z "$NAME" ]
+  then
+    echo "Missing parameter."
+    echo "Usage: get <name>"
+    return
+  fi
+
+  if [ ! -v "configmap[$NAME]" ]
+  then
+    echo "There is no registered config named $NAME."
+    echo "To register this config, use the 'add' command."
+    return
+  fi
+
+  echo "${configmap[$NAME]}"
+}
+
+move() {
+  NAME=$1
+  CONFIGPATH=$2
+
+  if [ -z "$NAME" ] || [ -z "$CONFIGPATH" ]
+  then
+    echo "Missing parameter."
+    echo "Usage: mv <name> </path/to/file>"
+    return
+  fi
+
+  if [ ! -v "configmap[$NAME]" ]
+  then
+    echo "There is no registered config named $NAME."
+    echo "To register this config, use the 'add' command."
+    return
+  fi
+
+  configmap[$NAME]=$CONFIGPATH
+  save
+
+  echo "$NAME now points to $CONFIGPATH."
+}
+
+remove() {
+  NAME=$1
+
+  if [ -z "$NAME" ]
+  then
+    echo "Missing parameter."
+    echo "Usage: rm <name>"
+    return
+  fi
+
+  if [ ! -v "configmap[$NAME]" ]
+  then
+    echo "There is no registered config named $NAME, so nothing was removed."
+    return
+  fi
+
+  unset configmap[$NAME]
+  save
+
+  echo "Removed $NAME from registered config list."
+}
+
+open() {
+  NAME=$1
+
+  if [ -z "$NAME" ]
+  then
+    echo "Missing parameter."
+    echo "Usage: open <name>"
+    return
+  fi
+
+  if [ ! -v "configmap[$NAME]" ]
+  then
+    echo "There is no registered config named $NAME."
+    echo "To register this config, use the 'add' command."
+    return
+  fi
+
+  nohup xdg-open "${configmap[$NAME]}" > /dev/null 2> /dev/null &
+}
+
+list() {
+  cat $CONFIGRCONFIG
+}
+
+case $1 in
+  help)
+    usage;;
+
+  add)
+    add $2 $3;;
+
+  get)
+    get $2;;
+  
+  mv)
+    move $2 $3;;
+
+  rm)
+    remove $2;;
+  
+  open)
+    open $2;;
+  
+  list)
+    list;;
+  
+  *)
+    usage;;
+esac

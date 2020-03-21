@@ -1,8 +1,14 @@
 # configr
 
-Command-line interface for quickly editing your system configuration.
+Command-line interface for managing your system configuration. Works in unix-like operating systems with Bash.
 
-Works in unix-like operating systems with Bash.
+The idea is simple: Config files can quickly add up, especially when you're epicly ricing your system. Often, people will add aliases to their `.profile` to make it faster to open their config files. `configr` is a tool to keep track of where your config files are located and open them quickly.
+
+To add a config file, run `configr add <name> <path>`. This will register the file with a short name. It can be named anything you like.
+
+To open a config file, run `configr open <name>`. This makes it fast to open config files without needing to remember and type out the full path, and without needing to populate your profile with aliases.
+
+The list of registered config names and paths are stored in `~/.config/configr/configmap`, so you can easily move it to another system or commit it into your giga chad `dotfiles` repository for flexing even harder on [/r/unixporn](https://www.reddit.com/r/unixporn/).
 
 ## Installation
 

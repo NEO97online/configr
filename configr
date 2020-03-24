@@ -1,16 +1,27 @@
 #!/usr/bin/env bash
 
 # Configr
-# Version: 1.0.0
+# Version: 1.1.0
 # Author : Michael Auderer
 # Github Profile : https://github.com/auderer
 # Project Repository : https://github.com/auderer/configr
 
+VERSION='1.1.0'
+
+version() {
+  echo "Configr v$VERSION"
+}
+
 usage() {
+  version
+  echo
   echo 'Commands:'
   echo
   echo '  help'
   echo '    Show command usage.'
+  echo
+  echo '  version'
+  echo '    Show version information.'
   echo
   echo '  add <name> </path/to/file>'
   echo '    Register a new config file.'
@@ -170,7 +181,7 @@ open() {
     return
   fi
 
-  nohup xdg-open "${configmap[$NAME]}" > /dev/null 2> /dev/null &
+  $EDITOR "${configmap[$NAME]}"
 }
 
 list() {
@@ -178,6 +189,9 @@ list() {
 }
 
 case $1 in
+  version|-v|--version)
+    version;;
+
   help)
     usage;;
 

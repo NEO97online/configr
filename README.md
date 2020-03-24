@@ -26,6 +26,8 @@ sudo chmod +x /usr/bin/configr
 
 Ironically, `configr` has no configuration as of now. The saved config map is stored in `~/.config/configr/configmap` by default. You can change this by setting `$CONFIGRCONFIG` to the file path you want to use. In this way, you could potentially have multiple separate sets of configs.
 
+When opening a config file using `configr`, it will use the editor you define in the `EDITOR` environment variable.
+
 ```bash
 export CONFIGRCONFIG=~/.config/configr/alternative-configmap
 configr add foo bar

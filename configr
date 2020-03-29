@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
 # Configr
-# Version: 1.1.0
-# Author : Michael Auderer
-# Github Profile : https://github.com/auderer
-# Project Repository : https://github.com/auderer/configr
+# Author: Michael Auderer
+# Github Profile: https://github.com/auderer
+# Project Repository: https://github.com/auderer/configr
 
-VERSION='1.1.0'
+VERSION='1.2.0'
 
 version() {
   echo "Configr v$VERSION"
@@ -38,8 +37,11 @@ usage() {
   echo '  open <name>'
   echo '    Opens a config file in your default editor.'
   echo
-  echo '  list'
+  echo '  list [-n]'
   echo '    Lists all registered config names and their paths.'
+  echo '    Options:'
+  echo '        -n'
+  echo '            Lists only registered names without their paths.'
 }
 
 CONFIGRCONFIG=${CONFIGRCONFIG:-"$HOME/.config/configr/configmap"}
@@ -185,7 +187,26 @@ open() {
 }
 
 list() {
-  cat $CONFIGRCONFIG
+  print_paths=true;
+
+  while [ -n "$1" ]; do
+    case "$1" in
+      -n) 
+	print_paths=false;;
+    esac
+    shift
+  done
+
+  for key in "${!configmap[@]}"
+  do
+    :
+    if $print_paths
+    then
+      echo "$key: ${configmap[$key]}"
+    else
+      echo "$key"
+    fi
+  done
 }
 
 case $1 in
@@ -211,7 +232,7 @@ case $1 in
     open $2;;
   
   list)
-    list;;
+    list $2;;
   
   *)
     usage;;
